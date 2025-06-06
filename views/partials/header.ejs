@@ -1,0 +1,36 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">Collaborative Decision Maker</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="navbar-item">
+                    <a class="nav-link" href="/dashboard">Dashboard</a>
+                </li>
+                <li class="navbar-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        Topics
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/topics">View All Topics</a></li>
+                        <li><a class="dropdown-item" href="/topics/new">Create New Topic</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="d-flex">
+                <div id="user-info" class="d-none">
+                    <span class="navbar-text me-3">
+                        Welcome, <span id="user-name"></span>
+                    </span>
+                    <button id="logout-btn" class="btn btn-outline-light">Logout</button>
+                </div>
+                <div id="login-register" class="d-flex">
+                    <button class="btn btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
+                    <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#registerModal">Register</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
