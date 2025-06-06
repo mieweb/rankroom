@@ -1,0 +1,16 @@
+{
+  "testEnvironment": "node",
+  "testMatch": [
+    "**/tests/**/*.test.js",
+    "**/__tests__/**/*.test.js"
+  ],
+  "collectCoverageFrom": [
+    "**/*.js",
+    "!**/node_modules/**",
+    "!**/tests/**",
+    "!**/public/**",
+    "!**/coverage/**"
+  ],
+  "testTimeout": 10000,
+  "verbose": true
+}
