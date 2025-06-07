@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RankRoom Widget Demo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .demo-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .widget-container { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .code-example { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin: 10px 0; }
+        pre { margin: 0; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="text-center mb-5">
+            <h1>RankRoom Embeddable Widget Demo</h1>
+            <p class="lead">See how easy it is to embed decision rooms in your application</p>
+        </div>
+
+        <!-- Basic Usage Example -->
+        <div class="row mb-5">
+            <div class="col-md-6">
+                <h3>Basic Widget</h3>
+                <p>Create and manage decision rooms with minimal setup</p>
+                
+                <div class="code-example">
+                    <pre><code>&lt;div id="rankroom-widget-1"&gt;&lt;/div&gt;
+&lt;script&gt;
+  const widget = RankRoomWidget.create({
+    containerId: 'rankroom-widget-1',
+    serverUrl: 'http://localhost:3000'
+  });
+&lt;/script&gt;</code></pre>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="widget-container">
+                    <div id="rankroom-widget-1"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Example -->
+        <div class="row mb-5">
+            <div class="col-md-6">
+                <h3>Pre-configured Room</h3>
+                <p>Start with a specific room configuration</p>
+                
+                <div class="code-example">
+                    <pre><code>&lt;div id="rankroom-widget-2"&gt;&lt;/div&gt;
+&lt;script&gt;
+  const config = {
+    room: {
+      title: "Team Lunch Ideas",
+      votingSystem: "dot-voting",
+      votesPerParticipant: 3
+    }
+  };
+  RankRoomWidget.fromConfig(config, 'rankroom-widget-2');
+&lt;/script&gt;</code></pre>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="widget-container">
+                    <div id="rankroom-widget-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Examples -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h3>API Usage Examples</h3>
+                <p>Integrate with your existing systems using the REST API</p>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5>Create Room</h5>
+                        <div class="code-example">
+                            <pre><code>POST /api/rooms
+{
+  "title": "Feature Prioritization",
+  "votingSystem": "dot-voting",
+  "votesPerParticipant": 5,
+  "authentication": "anonymous"
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <h5>Submit Idea</h5>
+                        <div class="code-example">
+                            <pre><code>POST /api/rooms/{roomId}/ideas
+{
+  "text": "Add dark mode support"
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <h5>Get Results</h5>
+                        <div class="code-example">
+                            <pre><code>GET /api/rooms/{roomId}/results
+
+// Returns ranked ideas and statistics</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MCP Server Example -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h3>MCP Server Integration</h3>
+                <p>Use with AI assistants and automation tools</p>
+                
+                <div class="code-example">
+                    <pre><code>// AI can create and manage decision rooms
+const roomResult = await mcpServer.call('create_decision_room', {
+  title: 'Project Ideas for Q2',
+  votingSystem: 'alternative-voting'
+});
+
+// Monitor and summarize results
+const summary = await mcpServer.call('get_room_summary', {
+  roomId: roomResult.roomId
+});
+
+console.log(summary); 
+// "Decision room 'Project Ideas for Q2' had 8 ideas from 5 participants. 
+//  Top idea: 'Mobile app redesign' with 12 votes."</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h3>Key Features</h3>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Multiple Voting Systems</h5>
+                        <p class="card-text">Dot voting, first-past-the-post, alternative voting</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Real-time Updates</h5>
+                        <p class="card-text">Live idea submission and voting with instant feedback</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Embeddable</h5>
+                        <p class="card-text">Drop into any web application with minimal code</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Anonymous & Authenticated</h5>
+                        <p class="card-text">Support for both anonymous and SSO-based participation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Testing Area -->
+        <div class="row">
+            <div class="col-12">
+                <h3>Test the API</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <button class="btn btn-primary w-100 mb-2" onclick="testCreateRoom()">Create Test Room</button>
+                                <button class="btn btn-success w-100 mb-2" onclick="testSubmitIdea()">Submit Test Idea</button>
+                                <button class="btn btn-warning w-100 mb-2" onclick="testVote()">Cast Test Vote</button>
+                                <button class="btn btn-info w-100" onclick="testGetResults()">Get Results</button>
+                            </div>
+                            <div class="col-md-8">
+                                <div id="test-output" class="border p-3" style="height: 200px; overflow-y: auto; background: #f8f9fa;">
+                                    <em>Test output will appear here...</em>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include Socket.IO for real-time features -->
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <!-- Include the RankRoom widget -->
+    <script>
+        // Inline the widget code for demo purposes
+        // In production, you would load from: <script src="path/to/rankroom-widget.js"></script>
+        
+        class RankRoomWidget {
+          constructor(options = {}) {
+            this.options = {
+              serverUrl: options.serverUrl || 'http://localhost:3000',
+              containerId: options.containerId || 'rankroom-widget',
+              theme: options.theme || 'default',
+              ...options
+            };
+            
+            this.container = null;
+            this.socket = null;
+            this.currentRoom = null;
+            this.currentUser = null;
+          }
+
+          init() {
+            this.container = document.getElementById(this.options.containerId);
+            if (!this.container) {
+              throw new Error(`Container element with ID "${this.options.containerId}" not found`);
+            }
+
+            this.loadStyles();
+            this.setupSocketConnection();
+            this.render();
+          }
+
+          loadStyles() {
+            if (document.getElementById('rankroom-styles')) return;
+            
+            const styles = `
+              .rankroom-widget {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                padding: 20px;
+                background: white;
+                max-width: 600px;
+              }
+              .rr-header { margin-bottom: 20px; }
+              .rr-title { margin: 0 0 10px 0; font-size: 18px; font-weight: 600; }
+              .rr-description { color: #6c757d; margin: 0; }
+              .rr-form { margin-bottom: 20px; }
+              .rr-input, .rr-select, .rr-textarea {
+                width: 100%; padding: 8px 12px; border: 1px solid #ced4da;
+                border-radius: 4px; margin-bottom: 10px; font-size: 14px;
+              }
+              .rr-button {
+                background: #007bff; color: white; border: none; padding: 8px 16px;
+                border-radius: 4px; cursor: pointer; font-size: 14px;
+              }
+              .rr-button:hover { background: #0056b3; }
+              .rr-button:disabled { background: #6c757d; cursor: not-allowed; }
+              .rr-idea-list { list-style: none; padding: 0; margin: 0; }
+              .rr-idea-item {
+                padding: 12px; border: 1px solid #e9ecef; border-radius: 4px;
+                margin-bottom: 8px; display: flex; justify-content: space-between;
+                align-items: center;
+              }
+              .rr-vote-count {
+                background: #28a745; color: white; padding: 4px 8px;
+                border-radius: 12px; font-size: 12px; font-weight: 600;
+              }
+              .rr-vote-btn {
+                background: #17a2b8; color: white; border: none;
+                padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;
+              }
+              .rr-vote-btn:hover { background: #138496; }
+              .rr-loading { text-align: center; padding: 40px; color: #6c757d; }
+              .rr-error { color: #dc3545; padding: 10px; background: #f8d7da; border-radius: 4px; }
+            `;
+
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'rankroom-styles';
+            styleSheet.textContent = styles;
+            document.head.appendChild(styleSheet);
+          }
+
+          setupSocketConnection() {
+            if (typeof io !== 'undefined') {
+              this.socket = io(this.options.serverUrl);
+              
+              this.socket.on('ideaAdded', (data) => {
+                if (data.roomId === this.currentRoom?._id) {
+                  this.refreshIdeas();
+                }
+              });
+
+              this.socket.on('voteAdded', (data) => {
+                if (data.roomId === this.currentRoom?._id) {
+                  this.refreshIdeas();
+                }
+              });
+            }
+          }
+
+          render() {
+            if (!this.currentRoom) {
+              this.renderCreateRoom();
+            } else {
+              this.renderRoom();
+            }
+          }
+
+          renderCreateRoom() {
+            this.container.innerHTML = `
+              <div class="rankroom-widget">
+                <div class="rr-header">
+                  <h3 class="rr-title">Create Decision Room</h3>
+                  <p class="rr-description">Start a collaborative voting session</p>
+                </div>
+                
+                <form class="rr-form" id="rr-create-form">
+                  <input type="text" class="rr-input" placeholder="Room title" required id="rr-title">
+                  <textarea class="rr-textarea" placeholder="Description (optional)" id="rr-description"></textarea>
+                  
+                  <select class="rr-select" id="rr-voting-system">
+                    <option value="dot-voting">Dot Voting</option>
+                    <option value="first-past-the-post">First Past the Post</option>
+                    <option value="alternative-voting">Alternative Voting</option>
+                  </select>
+                  
+                  <input type="number" class="rr-input" placeholder="Votes per participant" value="3" min="1" id="rr-votes">
+                  
+                  <button type="submit" class="rr-button">Create Room</button>
+                </form>
+              </div>
+            `;
+
+            const form = this.container.querySelector('#rr-create-form');
+            form.addEventListener('submit', (e) => this.handleCreateRoom(e));
+          }
+
+          renderRoom() {
+            const room = this.currentRoom;
+            const ideas = room.ideas || [];
+            
+            this.container.innerHTML = `
+              <div class="rankroom-widget">
+                <div class="rr-header">
+                  <h3 class="rr-title">${room.title}</h3>
+                  <p class="rr-description">${room.description}</p>
+                  <small>Voting System: ${room.votingSystem} • ${room.votesPerParticipant} votes per participant</small>
+                </div>
+
+                ${!room.endedAt ? `
+                  <form class="rr-form" id="rr-idea-form">
+                    <input type="text" class="rr-input" placeholder="Share your idea..." required id="rr-idea-text">
+                    <button type="submit" class="rr-button">Submit Idea</button>
+                  </form>
+                ` : '<p style="color: #dc3545; font-weight: 600;">Voting has ended</p>'}
+
+                <div class="rr-ideas">
+                  <h4 style="margin: 0 0 10px 0; font-size: 16px;">Ideas & Votes</h4>
+                  ${ideas.length > 0 ? `
+                    <ul class="rr-idea-list">
+                      ${ideas.map(idea => `
+                        <li class="rr-idea-item">
+                          <span>${idea.text}</span>
+                          <div>
+                            <span class="rr-vote-count">${idea.voteCount || 0}</span>
+                            ${!room.endedAt ? `
+                              <button class="rr-vote-btn" onclick="window.rankroomWidget_${this.options.containerId}.vote('${idea._id}')">Vote</button>
+                            ` : ''}
+                          </div>
+                        </li>
+                      `).join('')}
+                    </ul>
+                  ` : '<p style="color: #6c757d; text-align: center;">No ideas yet. Be the first to submit one!</p>'}
+                </div>
+
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef; font-size: 12px; color: #6c757d;">
+                  Room ID: ${room._id} | Participants: ${room.participants?.length || 0}
+                </div>
+              </div>
+            `;
+
+            const ideaForm = this.container.querySelector('#rr-idea-form');
+            if (ideaForm) {
+              ideaForm.addEventListener('submit', (e) => this.handleSubmitIdea(e));
+            }
+
+            // Make vote function globally accessible for inline onclick
+            window[`rankroomWidget_${this.options.containerId}`] = this;
+          }
+
+          async handleCreateRoom(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('rr-title').value;
+            const description = document.getElementById('rr-description').value;
+            const votingSystem = document.getElementById('rr-voting-system').value;
+            const votesPerParticipant = parseInt(document.getElementById('rr-votes').value);
+
+            try {
+              const response = await fetch(`${this.options.serverUrl}/api/rooms`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  title,
+                  description,
+                  votingSystem,
+                  votesPerParticipant,
+                  phases: { ideaSubmission: true, voting: true, combined: true },
+                  authentication: 'anonymous'
+                })
+              });
+
+              const result = await response.json();
+              if (result.success) {
+                await this.joinRoom(result.roomId);
+              } else {
+                this.showError('Failed to create room');
+              }
+            } catch (error) {
+              this.showError('Error creating room: ' + error.message);
+            }
+          }
+
+          async handleSubmitIdea(event) {
+            event.preventDefault();
+            
+            const ideaText = document.getElementById('rr-idea-text').value.trim();
+            if (!ideaText) return;
+
+            try {
+              const response = await fetch(`${this.options.serverUrl}/api/rooms/${this.currentRoom._id}/ideas`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: ideaText })
+              });
+
+              const result = await response.json();
+              if (result.success) {
+                document.getElementById('rr-idea-text').value = '';
+                await this.refreshRoom();
+              } else {
+                this.showError('Failed to submit idea');
+              }
+            } catch (error) {
+              this.showError('Error submitting idea: ' + error.message);
+            }
+          }
+
+          async vote(ideaId) {
+            try {
+              const response = await fetch(`${this.options.serverUrl}/api/rooms/${this.currentRoom._id}/vote`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ideaId })
+              });
+
+              const result = await response.json();
+              if (result.success) {
+                await this.refreshRoom();
+              } else {
+                this.showError('Failed to vote: ' + (result.message || 'Unknown error'));
+              }
+            } catch (error) {
+              this.showError('Error voting: ' + error.message);
+            }
+          }
+
+          async joinRoom(roomId, participantData = {}) {
+            try {
+              const response = await fetch(`${this.options.serverUrl}/api/rooms/${roomId}/join`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(participantData)
+              });
+
+              const result = await response.json();
+              if (result.success) {
+                this.currentUser = { id: result.participantId };
+                await this.loadRoom(roomId);
+                if (this.socket) {
+                  this.socket.emit('joinRoom', roomId);
+                }
+              } else {
+                this.showError('Failed to join room');
+              }
+            } catch (error) {
+              this.showError('Error joining room: ' + error.message);
+            }
+          }
+
+          async loadRoom(roomId) {
+            try {
+              const response = await fetch(`${this.options.serverUrl}/api/rooms/${roomId}`);
+              const room = await response.json();
+              
+              if (room) {
+                this.currentRoom = room;
+                this.render();
+              } else {
+                this.showError('Room not found');
+              }
+            } catch (error) {
+              this.showError('Error loading room: ' + error.message);
+            }
+          }
+
+          async refreshRoom() {
+            if (this.currentRoom) {
+              await this.loadRoom(this.currentRoom._id);
+            }
+          }
+
+          async refreshIdeas() {
+            if (!this.currentRoom) return;
+            
+            try {
+              const response = await fetch(`${this.options.serverUrl}/api/rooms/${this.currentRoom._id}/ideas`);
+              const ideas = await response.json();
+              this.currentRoom.ideas = ideas;
+              this.render();
+            } catch (error) {
+              console.error('Error refreshing ideas:', error);
+            }
+          }
+
+          showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'rr-error';
+            errorDiv.textContent = message;
+            
+            this.container.insertBefore(errorDiv, this.container.firstChild);
+            
+            setTimeout(() => {
+              if (errorDiv.parentNode) {
+                errorDiv.parentNode.removeChild(errorDiv);
+              }
+            }, 5000);
+          }
+
+          destroy() {
+            if (this.socket) {
+              this.socket.disconnect();
+            }
+            if (this.container) {
+              this.container.innerHTML = '';
+            }
+          }
+
+          static create(options) {
+            const widget = new RankRoomWidget(options);
+            widget.init();
+            return widget;
+          }
+
+          static fromConfig(config, containerId) {
+            const options = {
+              containerId,
+              ...config
+            };
+            
+            if (config.room) {
+              options.initialRoom = config.room;
+            }
+            
+            return RankRoomWidget.create(options);
+          }
+        }
+
+        // Initialize demo widgets
+        document.addEventListener('DOMContentLoaded', function() {
+            // Basic widget
+            const widget1 = RankRoomWidget.create({
+                containerId: 'rankroom-widget-1',
+                serverUrl: window.location.origin
+            });
+            
+            // Pre-configured widget (will still show create form, but could be enhanced)
+            const widget2 = RankRoomWidget.create({
+                containerId: 'rankroom-widget-2',
+                serverUrl: window.location.origin
+            });
+        });
+
+        // API Testing Functions
+        let testRoomId = null;
+        let testIdeaId = null;
+
+        function log(message) {
+            const output = document.getElementById('test-output');
+            output.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        async function testCreateRoom() {
+            try {
+                const response = await fetch('/api/rooms', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: 'Test Room ' + Date.now(),
+                        description: 'API test room',
+                        votingSystem: 'dot-voting',
+                        votesPerParticipant: 3,
+                        phases: { ideaSubmission: true, voting: true, combined: true },
+                        authentication: 'anonymous'
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    testRoomId = result.roomId;
+                    log(`✅ Room created: ${testRoomId}`);
+                } else {
+                    log(`❌ Failed to create room`);
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+            }
+        }
+
+        async function testSubmitIdea() {
+            if (!testRoomId) {
+                log('❌ Create a room first');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/rooms/${testRoomId}/ideas`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: 'Test idea ' + Date.now()
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    testIdeaId = result.ideaId;
+                    log(`✅ Idea submitted: ${testIdeaId}`);
+                } else {
+                    log(`❌ Failed to submit idea`);
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+            }
+        }
+
+        async function testVote() {
+            if (!testRoomId || !testIdeaId) {
+                log('❌ Create a room and submit an idea first');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/rooms/${testRoomId}/vote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ideaId: testIdeaId
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    log(`✅ Vote cast successfully`);
+                } else {
+                    log(`❌ Failed to vote: ${result.message}`);
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+            }
+        }
+
+        async function testGetResults() {
+            if (!testRoomId) {
+                log('❌ Create a room first');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/rooms/${testRoomId}/results`);
+                const results = await response.json();
+                
+                log(`✅ Results: ${results.statistics.totalIdeas} ideas, ${results.statistics.totalVotes} votes`);
+                if (results.rankedIdeas.length > 0) {
+                    log(`Top idea: "${results.rankedIdeas[0].text}" (${results.rankedIdeas[0].voteCount} votes)`);
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>

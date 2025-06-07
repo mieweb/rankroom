@@ -17,6 +17,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Make io available to routes
+app.set('io', io);
+
 // Add cache-control headers to prevent browser caching
 app.use((req, res, next) => {
   // Set cache control headers for all API responses
@@ -47,6 +50,7 @@ const criteriaRoutes = require('./routes/criteriaRoutes');
 const candidateRoutes = require('./routes/candidateRoutes');
 const evaluationRoutes = require('./routes/evaluationRoutes');
 const demoRoutes = require('./routes/demoRoutes');
+const decisionRoomRoutes = require('./routes/decisionRoomRoutes');
 
 // Use routes
 app.use('/api/topics', topicRoutes);
@@ -55,6 +59,7 @@ app.use('/api/criteria', criteriaRoutes);
 app.use('/api/candidates', candidateRoutes);
 app.use('/api/evaluations', evaluationRoutes);
 app.use('/demo', demoRoutes);
+app.use('/api/rooms', decisionRoomRoutes);
 
 // Main route to serve the front-end
 app.get('/', (req, res) => {
@@ -78,6 +83,11 @@ io.on('connection', (socket) => {
   socket.on('joinTopic', (topicId) => {
     socket.join(topicId);
     console.log(`Client joined topic: ${topicId}`);
+  });
+
+  socket.on('joinRoom', (roomId) => {
+    socket.join(roomId);
+    console.log(`Client joined decision room: ${roomId}`);
   });
   
   socket.on('newCriterion', (data) => {
