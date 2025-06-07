@@ -1,10 +1,10 @@
 # RankRoom MCP Server
 
-Model Context Protocol (MCP) server for integrating RankRoom decision-making capabilities with AI assistants and automation tools.
+Model Context Protocol (MCP) server for integrating RankRoom's 3-phase collaborative decision-making capabilities with AI assistants and automation tools.
 
 ## Overview
 
-The RankRoom MCP Server enables AI assistants to create and manage decision rooms, submit ideas, vote on proposals, and summarize results. This allows for seamless integration of collaborative decision-making into AI-driven workflows.
+The RankRoom MCP Server enables AI assistants to manage complete 3-phase decision processes: Definition (criteria setting), Collection (candidate evaluation), and Decision (results analysis). This allows for sophisticated collaborative decision-making workflows integrated into AI-driven automation.
 
 ## Installation
 
@@ -18,10 +18,10 @@ npm install
 Set the RankRoom API URL via environment variable:
 
 ```bash
-export RANKROOM_API_URL=http://localhost:3000/api
+export RANKROOM_API_URL=http://localhost:32000/api
 ```
 
-Or use the default `http://localhost:3000/api`.
+Or use the default `http://localhost:32000/api`.
 
 ## Usage
 
@@ -36,7 +36,7 @@ Add to your Claude Desktop configuration:
       "command": "node",
       "args": ["/path/to/rankroom/mcp-server/src/index.js"],
       "env": {
-        "RANKROOM_API_URL": "http://localhost:3000/api"
+        "RANKROOM_API_URL": "http://localhost:32000/api"
       }
     }
   }
@@ -57,228 +57,468 @@ Or start in development mode:
 npm run dev
 ```
 
+## 3-Phase Decision Making Process
+
+### Phase 1: Definition
+- **Purpose**: Define and collaborate on decision criteria
+- **Actions**: Create criteria, share with team, build consensus on what matters
+- **Advancement**: Room leader advances to Collection phase when criteria are complete
+
+### Phase 2: Collection
+- **Purpose**: Evaluate candidates against shared criteria privately
+- **Actions**: Add candidates, score each candidate (1-10) against criteria, add notes
+- **Privacy**: Participants can't see each other's evaluations during this phase
+- **Advancement**: Room leader advances to Decision phase when evaluations are complete
+
+### Phase 3: Decision
+- **Purpose**: Analyze aggregated results and make informed decisions
+- **Actions**: View rankings, analyze scores and variance, export results
+- **Transparency**: All evaluation data becomes visible for analysis
+
 ## Available Tools
 
-### `create_decision_room`
+### User Management
 
-Create a new decision room for collaborative voting.
+#### `create_user`
+Create a new user for 3-phase decision making.
 
 **Parameters:**
-- `title` (required): Title of the decision room
+- `name` (required): Full name of the user
+- `email` (required): Email address of the user
+
+**Example:**
+```
+Create a user named "Alice Johnson" with email alice@company.com
+```
+
+### Topic Management
+
+#### `create_decision_topic`
+Create a new 3-phase decision topic.
+
+**Parameters:**
+- `name` (required): Name of the decision topic
 - `description` (optional): Description of what needs to be decided
-- `votingSystem` (optional): 'dot-voting', 'first-past-the-post', or 'alternative-voting'
-- `votesPerParticipant` (optional): Number of votes each participant gets
-- `authentication` (optional): 'anonymous', 'required', or 'sso'
+- `userId` (required): ID of the user creating the topic (becomes room leader)
+- `settings` (optional): Configuration for collaboration and privacy
 
 **Example:**
 ```
-Please create a decision room titled "Q2 Project Priorities" with dot voting and 5 votes per participant.
+Create a decision topic called "Q2 Strategic Priorities" for user alice-user-id
 ```
 
-### `join_room`
-
-Join an existing decision room.
+#### `join_topic`
+Join an existing decision topic.
 
 **Parameters:**
-- `roomId` (required): ID of the room to join
-- `participantName` (optional): Name of the participant
+- `topicId` (required): ID of the topic to join
+- `userId` (required): ID of the user joining
 
 **Example:**
 ```
-Join room abc123 as "AI Assistant"
+Have user bob-user-id join topic topic-123
 ```
 
-### `submit_idea`
-
-Submit an idea to a decision room.
+#### `advance_phase`
+Advance topic to next phase (room leader only).
 
 **Parameters:**
-- `roomId` (required): ID of the room
-- `ideaText` (required): The idea to submit
+- `topicId` (required): ID of the topic
+- `userId` (required): ID of the room leader
+- `targetPhase` (required): Phase to advance to (2=Collection, 3=Decision)
 
 **Example:**
 ```
-Submit the idea "Implement mobile app" to room abc123
+Advance topic topic-123 to Collection phase for user alice-user-id
 ```
 
-### `vote_on_idea`
+### Definition Phase Tools
 
-Vote on an idea in a decision room.
+#### `create_criterion`
+Create a criterion in the Definition phase.
 
 **Parameters:**
-- `roomId` (required): ID of the room
-- `ideaId` (required): ID of the idea to vote on
+- `name` (required): Name of the criterion
+- `description` (optional): Description of the criterion
+- `topicId` (required): ID of the topic
+- `userId` (required): ID of the user creating the criterion
+- `isShared` (optional): Whether to share with other participants
 
 **Example:**
 ```
-Vote on idea xyz789 in room abc123
+Create a criterion called "Cost Effectiveness" for topic topic-123
 ```
 
-### `get_room_status`
-
-Get current status and ideas in a decision room.
+#### `share_criterion`
+Share a personal criterion with other participants.
 
 **Parameters:**
-- `roomId` (required): ID of the room
+- `criterionId` (required): ID of the criterion to share
+- `userId` (required): ID of the criterion owner
 
 **Example:**
 ```
-What's the current status of room abc123?
+Share criterion crit-456 for user alice-user-id
 ```
 
-### `get_room_results`
+### Collection Phase Tools
 
-Get final results and summary of a decision room.
+#### `create_candidate`
+Create a candidate to be evaluated.
 
 **Parameters:**
-- `roomId` (required): ID of the room
+- `name` (required): Name of the candidate
+- `description` (optional): Description of the candidate
+- `topicId` (required): ID of the topic
+- `userId` (required): ID of the user creating the candidate
 
 **Example:**
 ```
-Show me the final results for room abc123
+Create a candidate called "Option A: Cloud Migration" for topic topic-123
 ```
 
-### `end_voting`
-
-End voting in a decision room (creator only).
+#### `submit_evaluation`
+Submit an evaluation for a candidate against a criterion.
 
 **Parameters:**
-- `roomId` (required): ID of the room
+- `userId` (required): ID of the user submitting evaluation
+- `candidateId` (required): ID of the candidate being evaluated
+- `criterionId` (required): ID of the criterion for evaluation
+- `score` (required): Score from 1 (poor) to 10 (excellent)
+- `notes` (optional): Optional notes explaining the evaluation
 
 **Example:**
 ```
-End voting in room abc123
+Submit evaluation: user alice-user-id, candidate cand-789, criterion crit-456, score 8, notes "Strong cost benefits but implementation complexity"
 ```
 
-### `generate_invite_url`
+### Analysis Tools
 
-Generate an invite URL for a decision room.
+#### `get_topic_status`
+Get current status of a decision topic.
 
 **Parameters:**
-- `roomId` (required): ID of the room
-- `inviteType` (optional): 'room' or 'individual'
+- `topicId` (required): ID of the topic
 
 **Example:**
 ```
-Generate an invite URL for room abc123
+What's the current status of topic topic-123?
+```
+
+#### `get_topic_results`
+Get aggregated results and analysis (Decision phase only).
+
+**Parameters:**
+- `topicId` (required): ID of the topic
+
+**Example:**
+```
+Show me the final results for topic topic-123
+```
+
+#### `get_shared_criteria`
+Get all shared criteria for a topic.
+
+**Parameters:**
+- `topicId` (required): ID of the topic
+
+**Example:**
+```
+List all shared criteria for topic topic-123
+```
+
+#### `get_candidates`
+Get all candidates for a topic.
+
+**Parameters:**
+- `topicId` (required): ID of the topic
+
+**Example:**
+```
+List all candidates for topic topic-123
 ```
 
 ## AI Conversation Examples
 
-### Creating and Managing a Decision Room
+### Complete 3-Phase Workflow
 
 ```
-User: I need to make a decision about our next product features. Can you help me set up a voting session?
+User: Help me decide our Q2 strategic priorities using a structured decision process.
 
-AI: I'll create a decision room for your product feature voting. Let me set that up for you.
+AI: I'll set up a comprehensive 3-phase decision process for your Q2 strategic priorities. First, let me create you as a user in the system.
 
-[Uses create_decision_room with title "Product Feature Priorities"]
+[Uses create_user]
 
-✅ Decision room created successfully!
+✅ User created: Alice Johnson (alice-123)
 
-📊 Room Details:
-• Title: Product Feature Priorities
-• Room ID: abc123
-• Voting System: dot-voting
-• Votes per Participant: 3
-• Authentication: anonymous
+Now I'll create a decision topic for your Q2 strategic priorities.
 
-🔗 Share this URL with participants: /room/abc123
+[Uses create_decision_topic]
 
-Would you like me to add some initial feature ideas to get started?
+🎯 Decision topic created successfully!
 
-User: Yes, please add "Dark mode support" and "Mobile app" as ideas.
+**Topic Details:**
+- Name: Q2 Strategic Priorities
+- Topic ID: topic-456
+- Current Phase: 1 (Definition)
 
-AI: I'll add those ideas to the decision room.
+**Phase 1: Definition**
+We're now in the Definition phase where we'll identify what criteria matter most for evaluating your strategic options.
 
-[Uses submit_idea twice]
+Let me start by creating some common strategic criteria:
 
-✅ Both ideas submitted successfully! Your team members can now vote on:
-1. "Dark mode support"
-2. "Mobile app"
+[Uses create_criterion multiple times]
 
-I can monitor the voting progress and provide updates as votes come in.
+📋 Created shared criteria:
+1. "Revenue Impact" - Potential to drive revenue growth
+2. "Implementation Feasibility" - How realistic is execution
+3. "Strategic Alignment" - Fits with company mission
+4. "Resource Requirements" - Time, budget, personnel needed
+5. "Risk Level" - Potential downsides and uncertainties
+
+These criteria are now shared with all participants. Would you like to add any specific criteria for your business context?
+
+User: Yes, please add "Customer Satisfaction Impact" and "Competitive Advantage"
+
+AI: Excellent additions! Let me create those criteria.
+
+[Uses create_criterion twice]
+
+📋 Added criteria:
+- "Customer Satisfaction Impact" - Effect on customer happiness and retention
+- "Competitive Advantage" - Strengthens market position vs competitors
+
+Perfect! We now have 7 comprehensive criteria for evaluating your strategic options. Ready to advance to the Collection phase where we'll add candidates and start evaluations?
+
+User: Yes, let's move to evaluation
+
+AI: Great! I'll advance us to the Collection phase.
+
+[Uses advance_phase]
+
+🚀 Successfully advanced to Collection phase!
+
+**Phase 2: Collection**
+Now we can add strategic options (candidates) and evaluate them privately against our criteria.
+
+Let me add some common Q2 strategic options to get started:
+
+[Uses create_candidate multiple times]
+
+🏆 Added strategic candidates:
+1. "Product Feature Expansion" - Develop new product capabilities
+2. "Market Expansion" - Enter new geographic or customer segments  
+3. "Operational Efficiency" - Streamline processes and reduce costs
+4. "Partnership Development" - Strategic alliances and integrations
+5. "Team Expansion" - Hire key talent and build capabilities
+
+Now I'll help you evaluate these options. Let me start with "Product Feature Expansion" against our criteria:
+
+[Uses submit_evaluation multiple times for different criteria]
+
+📊 Evaluation completed for "Product Feature Expansion":
+- Revenue Impact: 8/10 - Strong potential for new revenue streams
+- Implementation Feasibility: 6/10 - Requires significant development effort
+- Strategic Alignment: 9/10 - Core to our product strategy
+- Resource Requirements: 4/10 - High investment needed
+- Risk Level: 7/10 - Market acceptance uncertainty
+- Customer Satisfaction: 8/10 - Addresses key customer requests
+- Competitive Advantage: 7/10 - Can differentiate from competitors
+
+Would you like me to continue evaluating the other candidates, or would you prefer to do some evaluations yourself?
+
+User: Please evaluate all candidates and then show me the results
+
+AI: I'll complete evaluations for all candidates across all criteria and then advance to the Decision phase.
+
+[Uses submit_evaluation for all remaining candidates]
+
+✅ All evaluations completed! Now let me advance to the Decision phase for final analysis.
+
+[Uses advance_phase to phase 3]
+
+🚀 Advanced to Decision phase! Let me get the comprehensive results.
+
+[Uses get_topic_results]
+
+📊 **Final Strategic Priority Results**
+
+**Winner:** Product Feature Expansion (7.4/10)
+
+**Complete Rankings:**
+
+**1. Product Feature Expansion**
+   - Average Score: 7.4/10
+   - Total Evaluations: 7
+   - Score Variance: 2.1
+   - Description: Develop new product capabilities
+
+**2. Partnership Development**
+   - Average Score: 6.8/10
+   - Total Evaluations: 7
+   - Score Variance: 1.8
+   - Description: Strategic alliances and integrations
+
+**3. Market Expansion**
+   - Average Score: 6.2/10
+   - Total Evaluations: 7
+   - Score Variance: 2.4
+   - Description: Enter new geographic or customer segments
+
+**4. Team Expansion**
+   - Average Score: 5.9/10
+   - Total Evaluations: 7
+   - Score Variance: 1.6
+   - Description: Hire key talent and build capabilities
+
+**5. Operational Efficiency**
+   - Average Score: 5.7/10
+   - Total Evaluations: 7
+   - Score Variance: 1.3
+   - Description: Streamline processes and reduce costs
+
+**Analysis Summary:**
+- Total Candidates: 5
+- Evaluation Process: Complete
+- Recommended Decision: Product Feature Expansion based on highest average score
+
+**Key Insights:**
+1. **Product Feature Expansion** wins with strong scores in Revenue Impact (8), Strategic Alignment (9), and Customer Satisfaction (8)
+2. **Partnership Development** is a close second with lower resource requirements and risk
+3. **Market Expansion** shows potential but higher variance indicates less consensus
+4. **Low variance on Operational Efficiency** suggests team agreement it's less strategic priority
+
+**Recommendation:** Focus Q2 efforts on Product Feature Expansion while exploring Partnership Development as a parallel, lower-resource initiative.
 ```
 
-### Monitoring and Summarizing Results
+### Collaborative Multi-User Workflow
 
 ```
-User: Can you check on the voting progress for our feature decision?
+User: Set up a decision process for our team to evaluate vendor options. I need Alice, Bob, and Carol to participate.
 
-AI: Let me check the current status of your decision room.
+AI: I'll set up a collaborative vendor evaluation process for your team. Let me create the users and decision topic.
 
-[Uses get_room_status]
+[Uses create_user for Alice, Bob, Carol]
 
-📊 Decision Room Status
+✅ Created team users:
+- Alice Johnson (alice-789)
+- Bob Smith (bob-456) 
+- Carol Davis (carol-123)
 
-🏷️ Title: Product Feature Priorities
-👥 Participants: 8
-💡 Ideas: 5
-📊 Status: active
+[Uses create_decision_topic with Alice as room leader]
 
-🔥 Current Ideas:
-1. "Dark mode support" (12 votes)
-2. "Mobile app" (10 votes)
-3. "API improvements" (8 votes)
-4. "Better analytics" (5 votes)
-5. "Integration with Slack" (3 votes)
+🎯 Created "Vendor Selection Process" topic (topic-999)
 
-✅ Voting is active - participants can submit ideas and vote.
+Now let me invite Bob and Carol to join:
 
-It looks like "Dark mode support" is currently leading with 12 votes, followed closely by "Mobile app" with 10 votes. The voting is still active if you'd like to keep it open for more participants.
+[Uses join_topic for Bob and Carol]
 
-User: Let's end the voting and see the final results.
+✅ Team assembled! All participants joined.
 
-AI: I'll end the voting and get the final results for you.
+**Definition Phase Started**
+Let me create initial evaluation criteria for vendor selection:
 
-[Uses end_voting then get_room_results]
+[Uses create_criterion multiple times]
 
-🏆 Decision Room Results
+📋 Shared criteria created:
+1. Cost Effectiveness
+2. Technical Capabilities  
+3. Support Quality
+4. Implementation Timeline
+5. Security & Compliance
+6. Scalability
 
-📊 Product Feature Priorities
+The team can now add their own criteria and we'll collaborate on the final set. Ready to add vendor candidates and move to evaluation?
 
-📈 Statistics:
-• Total Ideas: 5
-• Total Votes: 38
-• Participants: 8
-• Average Votes per Idea: 7.6
+User: Yes, add Vendor A, B, and C, then advance to Collection
 
-🥇 Final Rankings:
-1. "Dark mode support" - 12 votes
-2. "Mobile app" - 10 votes
-3. "API improvements" - 8 votes
-4. "Better analytics" - 5 votes
-5. "Integration with Slack" - 3 votes
+AI: [Uses create_candidate for each vendor, then advance_phase]
 
-The team has spoken! Dark mode support is the clear winner with 12 votes. This shows strong consensus around improving the user interface experience. The mobile app came in second, indicating mobile functionality is also a priority for your users.
+🚀 Now in Collection phase! 
+
+Each team member can privately evaluate the vendors against our 6 criteria. The evaluations will remain private until we advance to Decision phase.
+
+I can guide each team member through their evaluations, or they can evaluate independently. Once everyone completes their assessments, we'll advance to see the aggregated results and make the final vendor decision.
+
+Would you like me to notify the team that evaluation is ready to begin?
 ```
 
-### Automated Workflow Integration
+### Automated Weekly Decision Process
 
 ```
-AI: I've detected that our weekly feature discussion is scheduled. Let me automatically create a decision room for this week's topics.
+AI: Monday morning - time for our weekly feature prioritization! Let me set up this week's decision process.
 
-[Uses create_decision_room]
+[Uses create_decision_topic]
 
-I've created "Week 15 Feature Discussion" and added the topics from our backlog:
+🎯 Created "Week 15 Feature Prioritization"
 
-[Uses submit_idea multiple times]
+[Uses create_criterion for standard feature criteria]
+[Uses create_candidate for backlog items]
 
-✅ Added 6 feature ideas from the backlog
-🔗 Invite URL: /room/week15-features
+✅ Automated setup complete:
+- 5 evaluation criteria loaded
+- 8 feature candidates from backlog added
+- Team notified to begin Definition phase review
 
-I'll monitor the voting throughout the week and provide a summary report on Friday. Team members can vote on their priorities anytime before then.
+The team has until Wednesday to review criteria and Thursday to complete evaluations. I'll automatically advance phases and provide Friday's decision summary.
 
-[Later that week...]
+[Wednesday update]
+AI: Midweek update - advancing to Collection phase for feature evaluations.
 
-AI: The weekly feature voting ends today. Here's the final summary:
+[Uses advance_phase]
 
-[Uses get_room_results]
+Team members can now privately score each feature. Reminder: evaluations due Thursday 5 PM.
 
-📊 This week's priorities are clear: Performance improvements lead with 24 votes, followed by user dashboard enhancements. I've automatically created tickets for the top 3 items and added them to the sprint planning board.
+[Friday summary]
+AI: Weekly feature prioritization complete! Here are this week's results:
 
-Would you like me to set up next week's decision room with the remaining items?
+[Uses get_topic_results]
+
+📊 **Week 15 Priority Rankings:**
+1. Mobile Performance Optimization (8.9/10)
+2. Advanced Search Filters (8.1/10)  
+3. User Dashboard Redesign (7.6/10)
+
+Top 3 features automatically added to Sprint 16 planning. Next week's prioritization will focus on remaining backlog items.
 ```
+
+## Integration Examples
+
+### GitHub Actions Workflow
+
+```yaml
+name: Monthly Strategic Planning
+on:
+  schedule:
+    - cron: '0 9 1 * *'  # First day of month at 9 AM
+
+jobs:
+  setup-decision-process:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Monthly Decision Topic
+        run: |
+          echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"create_decision_topic","arguments":{"name":"Monthly Strategic Review","userId":"'$TEAM_LEADER_ID'"}}}' | \
+          node mcp-server/src/index.js
+```
+
+### Slack Integration
+
+Use webhooks to trigger decision processes based on Slack commands:
+
+```
+/rankroom create "Feature Voting" 
+→ Creates decision topic, sets up criteria, notifies team
+```
+
+### Custom AI Assistant Integration
+
+Integrate with domain-specific AI assistants for specialized decision-making:
+
+- **Product Management**: Feature prioritization, roadmap planning
+- **HR Decisions**: Candidate evaluation, policy changes  
+- **Strategic Planning**: Market analysis, investment decisions
+- **Operations**: Vendor selection, process improvements
 
 ## Development
 
@@ -287,106 +527,39 @@ Would you like me to set up next week's decision room with the remaining items?
 ```
 mcp-server/
 ├── src/
-│   └── index.js          # Main MCP server implementation
+│   └── index.js          # Main MCP server with 3-phase tools
 ├── package.json          # Dependencies and scripts
-└── README.md            # This file
+└── README.md            # This documentation
 ```
 
-### Dependencies
+### Key Dependencies
 
 - `@modelcontextprotocol/sdk`: MCP SDK for server implementation
-- `axios`: HTTP client for API calls
-- `zod`: Schema validation
-
-### Adding New Tools
-
-To add a new tool, update the `setupToolHandlers()` method:
-
-1. Add tool definition to `ListToolsRequestSchema` handler
-2. Add case to `CallToolRequestSchema` handler
-3. Implement the tool method
-
-```javascript
-async myNewTool(args) {
-    const schema = z.object({
-        // Define parameters
-    });
-    
-    const validated = schema.parse(args);
-    
-    // Implement tool logic
-    
-    return {
-        content: [
-            {
-                type: 'text',
-                text: 'Tool response'
-            }
-        ]
-    };
-}
-```
+- `axios`: HTTP client for RankRoom API integration
+- `zod`: Schema validation for tool parameters
 
 ### Error Handling
 
-The server uses structured error handling with MCP error codes:
+Comprehensive error handling with structured MCP error responses:
 
 ```javascript
 throw new McpError(
     ErrorCode.InternalError,
-    `Error message: ${error.message}`
+    `Failed to create criterion: ${error.response?.data?.message || error.message}`
 );
 ```
 
 ### Testing
 
-Test the server with an MCP client or use the included test scripts:
+Test individual tools with direct JSON-RPC calls:
 
 ```bash
-# Test tool listing
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | node src/index.js
+# Test user creation
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"create_user","arguments":{"name":"Test User","email":"test@example.com"}}}' | node src/index.js
 
-# Test tool execution
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"create_decision_room","arguments":{"title":"Test Room"}}}' | node src/index.js
+# Test topic creation  
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"create_decision_topic","arguments":{"name":"Test Topic","userId":"user-123"}}}' | node src/index.js
 ```
-
-## Integration Examples
-
-### With GitHub Actions
-
-```yaml
-name: Weekly Feature Voting
-on:
-  schedule:
-    - cron: '0 9 * * 1'  # Every Monday at 9 AM
-
-jobs:
-  create-voting:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create Decision Room
-        run: |
-          echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"create_decision_room","arguments":{"title":"Weekly Feature Voting"}}}' | \
-          node mcp-server/src/index.js
-```
-
-### With Zapier/Make.com
-
-Use webhooks to trigger decision room creation and result compilation based on external events like:
-
-- Calendar events
-- Slack messages
-- Form submissions
-- Project milestones
-
-### With Custom AI Assistants
-
-Integrate with custom GPT models or other AI assistants to provide decision-making capabilities in specialized domains like:
-
-- Product management
-- Team coordination
-- Resource allocation
-- Strategic planning
 
 ## License
 
