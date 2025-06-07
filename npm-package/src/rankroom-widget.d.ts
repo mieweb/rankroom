@@ -2,9 +2,92 @@ export interface RankRoomOptions {
   containerId?: string;
   serverUrl?: string;
   theme?: 'default' | string;
-  initialRoom?: string;
+  mode?: '3-phase' | 'voting';
+  initialTopic?: string;
 }
 
+export interface TopicConfig {
+  name: string;
+  description?: string;
+  settings?: {
+    allowCriteriaCollaboration?: boolean;
+    hideEvaluationsDuringCollection?: boolean;
+  };
+}
+
+export interface Topic {
+  _id: string;
+  name: string;
+  description: string;
+  currentPhase: 1 | 2 | 3; // Definition, Collection, Decision
+  createdBy: string;
+  participants: User[];
+  settings: {
+    allowCriteriaCollaboration: boolean;
+    hideEvaluationsDuringCollection: boolean;
+  };
+  createdAt: Date;
+  phaseAdvancedAt?: Date;
+}
+
+export interface User {
+  _id: string;
+  name: string;
+  email: string;
+  topics: string[];
+  createdAt: Date;
+}
+
+export interface Criterion {
+  _id: string;
+  name: string;
+  description: string;
+  topic: string;
+  user: string;
+  rank: number;
+  isShared: boolean;
+  createdAt: Date;
+}
+
+export interface Candidate {
+  _id: string;
+  name: string;
+  description: string;
+  topic: string;
+  createdAt: Date;
+}
+
+export interface Evaluation {
+  _id: string;
+  user: string;
+  candidate: string;
+  criterion: string;
+  score: number; // 1-10
+  notes: string;
+  createdAt: Date;
+}
+
+export interface AggregatedResult {
+  candidate: Candidate;
+  averageScore: number;
+  scoreVariance: number;
+  totalEvaluations: number;
+  criteriaScores: {
+    criterion: Criterion;
+    averageScore: number;
+    variance: number;
+    evaluationCount: number;
+  }[];
+}
+
+export interface WidgetConfig {
+  topic?: TopicConfig;
+  serverUrl?: string;
+  theme?: string;
+  mode?: '3-phase' | 'voting';
+}
+
+// Legacy interfaces for backward compatibility
 export interface RoomConfig {
   title: string;
   description?: string;
@@ -73,12 +156,6 @@ export interface InviteUrl {
   usedBy: string[];
 }
 
-export interface WidgetConfig {
-  room?: RoomConfig;
-  serverUrl?: string;
-  theme?: string;
-}
-
 export declare class RankRoomWidget {
   constructor(options?: RankRoomOptions);
   
@@ -86,6 +163,13 @@ export declare class RankRoomWidget {
   render(): void;
   destroy(): void;
   
+  // 3-phase methods
+  selectCandidate(candidateId: string): void;
+  shareCriterion(criterionId: string): Promise<void>;
+  getEvaluation(criterionId: string, candidateId: string): Evaluation | null;
+  refreshTopic(): void;
+  
+  // Legacy methods for backward compatibility
   joinRoom(roomId: string, participantData?: { name?: string }): Promise<void>;
   vote(ideaId: string): Promise<void>;
   refreshRoom(): Promise<void>;
