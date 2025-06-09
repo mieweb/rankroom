@@ -1,0 +1,21 @@
+{
+  "name": "rankroom-meteor",
+  "version": "1.0.0",
+  "description": "Meteor-based decision room application",
+  "main": "server/main.js",
+  "scripts": {
+    "start": "meteor",
+    "test": "meteor test --once --driver-package meteortesting:mocha",
+    "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.20.13",
+    "meteor-node-stubs": "^1.2.5"
+  },
+  "meteor": {
+    "mainModule": {
+      "client": "client/main.js",
+      "server": "server/main.js"
+    }
+  }
+}

@@ -37,12 +37,42 @@ router.get('/user/:userId/topic/:topicId', async (req, res) => {
 // Get all evaluations for a specific candidate and criterion
 router.get('/candidate/:candidateId/criterion/:criterionId', async (req, res) => {
   try {
-    const evaluations = await Evaluation.find({
-      candidate: req.params.candidateId,
-      criterion: req.params.criterionId
-    }).populate('user', 'name email');
+    const { userId } = req.query; // Optional user ID to check permissions
     
-    res.status(200).json(evaluations);
+    // Get the candidate to find the topic
+    const candidate = await Candidate.findById(req.params.candidateId);
+    if (!candidate) {
+      return res.status(404).json({ message: 'Candidate not found' });
+    }
+    
+    // Get the topic to check phase and settings
+    const topic = await Topic.findById(candidate.topic);
+    if (!topic) {
+      return res.status(404).json({ message: 'Topic not found' });
+    }
+    
+    // If in Collection phase (2) and hideEvaluationsDuringCollection is true,
+    // only show the requesting user's own evaluations
+    if (topic.currentPhase === 2 && topic.settings.hideEvaluationsDuringCollection && userId) {
+      const evaluations = await Evaluation.find({
+        candidate: req.params.candidateId,
+        criterion: req.params.criterionId,
+        user: userId // Only user's own evaluations
+      }).populate('user', 'name email');
+      
+      res.status(200).json(evaluations);
+    } else if (topic.currentPhase < 3) {
+      // In Definition phase or Collection phase without user ID, return empty
+      res.status(200).json([]);
+    } else {
+      // In Decision phase (3), show all evaluations
+      const evaluations = await Evaluation.find({
+        candidate: req.params.candidateId,
+        criterion: req.params.criterionId
+      }).populate('user', 'name email');
+      
+      res.status(200).json(evaluations);
+    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -144,6 +174,19 @@ router.delete('/:id', async (req, res) => {
 // Get aggregated scores for all candidates in a topic
 router.get('/aggregated/topic/:topicId', async (req, res) => {
   try {
+    // Get the topic to check phase and settings
+    const topic = await Topic.findById(req.params.topicId);
+    if (!topic) {
+      return res.status(404).json({ message: 'Topic not found' });
+    }
+    
+    // Only show aggregated results in Decision phase (3)
+    if (topic.currentPhase < 3) {
+      return res.status(400).json({ 
+        message: 'Aggregated results are only available in the Decision phase' 
+      });
+    }
+    
     // Get all candidates for the topic
     const candidates = await Candidate.find({ topic: req.params.topicId });
     
@@ -152,12 +195,6 @@ router.get('/aggregated/topic/:topicId', async (req, res) => {
       topic: req.params.topicId,
       isShared: true
     });
-    
-    // Get all participants in the topic
-    const topic = await Topic.findById(req.params.topicId);
-    if (!topic) {
-      return res.status(404).json({ message: 'Topic not found' });
-    }
     
     // Build the results array
     const results = [];

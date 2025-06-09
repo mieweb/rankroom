@@ -6,7 +6,9 @@ const User = require('../models/User');
 // Get all topics
 router.get('/', async (req, res) => {
   try {
-    const topics = await Topic.find().populate('participants', 'name email');
+    const topics = await Topic.find()
+      .populate('participants', 'name email')
+      .populate('createdBy', 'name email');
     res.status(200).json(topics);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -16,7 +18,9 @@ router.get('/', async (req, res) => {
 // Get a single topic
 router.get('/:id', async (req, res) => {
   try {
-    const topic = await Topic.findById(req.params.id).populate('participants', 'name email');
+    const topic = await Topic.findById(req.params.id)
+      .populate('participants', 'name email')
+      .populate('createdBy', 'name email');
     if (!topic) {
       return res.status(404).json({ message: 'Topic not found' });
     }
@@ -29,7 +33,7 @@ router.get('/:id', async (req, res) => {
 // Create a new topic
 router.post('/', async (req, res) => {
   try {
-    const { name, description, userId } = req.body;
+    const { name, description, userId, settings } = req.body;
     
     if (!name || !userId) {
       return res.status(400).json({ message: 'Name and userId are required' });
@@ -44,7 +48,9 @@ router.post('/', async (req, res) => {
     const topic = new Topic({
       name,
       description,
-      participants: [userId]
+      createdBy: userId,
+      participants: [userId],
+      settings: settings || {}
     });
     
     const savedTopic = await topic.save();
@@ -143,13 +149,17 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// Update the phase of a topic
+// Update the phase of a topic (room leader only)
 router.patch('/:id/phase', async (req, res) => {
   try {
-    const { phase } = req.body;
+    const { phase, userId } = req.body;
     
     if (!phase || phase < 1 || phase > 3) {
       return res.status(400).json({ message: 'Valid phase (1-3) is required' });
+    }
+    
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required for phase advancement' });
     }
     
     const topic = await Topic.findById(req.params.id);
@@ -158,7 +168,27 @@ router.patch('/:id/phase', async (req, res) => {
       return res.status(404).json({ message: 'Topic not found' });
     }
     
+    // Check if user is the room leader (creator)
+    if (topic.createdBy.toString() !== userId) {
+      return res.status(403).json({ message: 'Only the room leader can advance phases' });
+    }
+    
+    // Validate phase progression (can only advance forward)
+    if (phase <= topic.currentPhase) {
+      return res.status(400).json({ message: 'Can only advance to a later phase' });
+    }
+    
+    // Validate phase transition logic
+    if (topic.currentPhase === 1 && phase > 2) {
+      return res.status(400).json({ message: 'Must advance from Definition to Collection phase first' });
+    }
+    
+    if (topic.currentPhase === 2 && phase > 3) {
+      return res.status(400).json({ message: 'Cannot advance beyond Decision phase' });
+    }
+    
     topic.currentPhase = phase;
+    topic.phaseAdvancedAt = new Date();
     await topic.save();
     
     res.status(200).json(topic);
